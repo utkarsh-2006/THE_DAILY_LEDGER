@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import * as Colyseus from 'colyseus.js';
 import type { GameState, PublicEvent } from 'game-core';
 
@@ -11,10 +11,23 @@ export function useGame() {
 
     useEffect(() => {
         let isUnmounted = false;
-        const client = new Colyseus.Client('ws://localhost:2567');
+        
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.hostname;
+        // In some dev environments like Codespaces, you might need to use a specific port or proxy
+        // But for local dev, 2567 is standard.
+        const client = new Colyseus.Client("ws://localhost:2567"); 
+        // Wait, if it's localhost, we can just use localhost or window.location.hostname
+        // Let's use window.location.hostname just in case they're accessing via 192.168.x.x
+        // Actually, if Colyseus is bound to 127.0.0.1, it WON'T accept 192.168.x.x
+        // The safest default for local dev is localhost OR window.location.hostname.
+        const wsUrl = wsProtocol + '//' + wsHost + ':2567';
+        
+        const colyseusClient = new Colyseus.Client(wsUrl);
+
         let currentRoom: Colyseus.Room | null = null;
 
-        client.joinOrCreate('daily_ledger').then((r: Colyseus.Room) => {
+        colyseusClient.joinOrCreate('daily_ledger').then((r: Colyseus.Room) => {
             if (isUnmounted) {
                 r.leave();
                 return;
@@ -58,7 +71,7 @@ export function useGame() {
         }).catch((e: any) => {
             if (!isUnmounted) {
                 console.error("Join error", e);
-                setError("Failed to connect to server.");
+                setError("Failed to connect to server at " + wsUrl);
             }
         });
 

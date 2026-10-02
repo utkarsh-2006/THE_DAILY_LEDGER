@@ -12,7 +12,7 @@ export default function GamePage() {
     if (!gameState) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#F3EFE6] text-[#151515] font-masthead text-2xl font-bold uppercase tracking-widest">
-                Connecting to Velora City...
+                Connecting to Velora City... {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
             </div>
         );
     }
