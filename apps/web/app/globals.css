@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+@layer utilities {
+  .news-hatch {
+    background-image: repeating-linear-gradient(45deg, rgba(21,21,21,0.03) 0, rgba(21,21,21,0.03) 1px, transparent 0, transparent 4px);
+  }
+  .pawn-glow {
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  }
+}

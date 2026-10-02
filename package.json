@@ -1,0 +1,32 @@
+{
+  "name": "thedailyledger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -b"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utkarsh-2006/THE_DAILY_LEDGER.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/utkarsh-2006/THE_DAILY_LEDGER/issues"
+  },
+  "homepage": "https://github.com/utkarsh-2006/THE_DAILY_LEDGER#readme",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
