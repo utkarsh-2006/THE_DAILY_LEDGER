@@ -141,17 +141,8 @@ function CentralGameStage({ gameState, playerId, sendIntent }: Props) {
     return (
         <div className="flex-1 relative flex flex-col items-center justify-center bg-[#EAE5D9] rounded-md border-2 border-ink shadow-[inset_0_0_60px_rgba(0,0,0,0.05)] overflow-hidden">
             
-            {/* Elegant Background Skyline / Art Placeholder */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.04]">
-                <svg viewBox="0 0 800 600" className="w-[80%] h-[80%] fill-ink" preserveAspectRatio="xMidYMid meet">
-                    <path d="M100 600 L100 400 L150 400 L150 300 L250 300 L250 200 L350 200 L350 150 L450 150 L450 250 L550 250 L550 350 L650 350 L650 450 L750 450 L750 600 Z" />
-                    <rect x="380" y="100" width="40" height="50" />
-                    <circle cx="400" cy="50" r="20" />
-                    <rect x="280" y="220" width="20" height="20" />
-                    <rect x="310" y="220" width="20" height="20" />
-                    <rect x="470" y="270" width="20" height="20" />
-                    <rect x="500" y="270" width="20" height="20" />
-                </svg>
+            {/* Original Velora City Background Artwork */}
+            <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-cover bg-center grayscale mix-blend-multiply" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2civPbaQl57Y58rls3vMhAHtHT8VY40VAHLGPMHv9lyo_3qXo8kpe_4GWMbaO6T7mg7H_0uNDpeDxSy-ZWVTUDORz20icfbwtWqzIM1qGcNNr4vtk5Uaw0IgdmSNfL3X69ql854YdW0_LItb8fI7fZZX7fT4oAPrG3U-1-9ZmsBlwJb0KLSItvxia_sKDNkclxn3cYInk2H_--Mq71KRIsONRUZwwU1hoLlnMYfQnv9_Ws8GnKs64wQ")' }}>
             </div>
 
             {/* Gameplay Interaction Plaque */}
