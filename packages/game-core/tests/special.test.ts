@@ -1,3 +1,4 @@
+import { DeterministicTestRandomSource } from '../src/randomness/index.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RulesEngine } from '../src/engine/index.js';
 import { createInitialGameState, GameState } from '../src/state/index.js';
@@ -16,7 +17,7 @@ describe('Special Spaces System', () => {
         state = createInitialGameState([
             { id: "p1", name: "Player 1" },
             { id: "p2", name: "Player 2" }
-        ]);
+        ], new DeterministicTestRandomSource());
     });
 
     describe('Civic Hold (Space 10) & Regulatory Court (Space 38)', () => {

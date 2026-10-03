@@ -20,11 +20,21 @@ import {
     resolveLiquidateDevelopment,
     resolveDeclareBankruptcy
 } from "../rules/finance.js";
+import {
+    resolveCreateTradeOffer,
+    resolveCounterTradeOffer,
+    resolveAcceptTradeOffer,
+    resolveRejectTradeOffer,
+    resolveCancelTradeOffer
+} from "../rules/trade.js";
 
 export interface EngineResult {
     state: GameState;
     events: (PublicEvent | PrivateEvent)[];
 }
+
+import { generateDistrictEvents } from '../rules/district.js';
+import { resolveConstructDevelopment } from '../rules/development.js';
 
 export class RulesEngine {
     constructor(private randomSource: RandomSource) {}
@@ -33,7 +43,8 @@ export class RulesEngine {
         const activePlayer = state.public.players[state.public.activePlayerIndex];
         const timestamp = Date.now();
 
-        if (intent.playerId !== activePlayer.id) {
+        const isTradeAction = ["CREATE_TRADE_OFFER","COUNTER_TRADE_OFFER","ACCEPT_TRADE_OFFER","REJECT_TRADE_OFFER","CANCEL_TRADE_OFFER"].includes(intent.type);
+        if (intent.playerId !== activePlayer.id && !isTradeAction) {
             return {
                 state,
                 events: [{
@@ -47,7 +58,7 @@ export class RulesEngine {
         }
 
         const newState = JSON.parse(JSON.stringify(state)) as GameState;
-        const currentActivePlayer = newState.public.players[newState.public.activePlayerIndex];
+        const currentActivePlayer = newState.public.players.find(p => p.id === intent.playerId) || newState.public.players[newState.public.activePlayerIndex];
 
         switch (intent.type) {
             case "ROLL_DICE": {
@@ -131,7 +142,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "SKIP_TRANSPORT": {
@@ -148,7 +159,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "CLAIM_TREASURY": {
@@ -165,7 +176,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "SKIP_TREASURY": {
@@ -182,7 +193,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "LIQUIDATE_PROPERTY": {
@@ -197,7 +208,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "LIQUIDATE_DEVELOPMENT": {
@@ -212,8 +223,23 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
+            case "CONSTRUCT_DEVELOPMENT": {
+                const payload = (intent.payload as any);
+                const result = resolveConstructDevelopment(newState, currentActivePlayer, payload.propertyId, payload.projectId, payload.slot);
+                if (!result.success) {
+                    return {
+                        state,
+                        events: [{
+                            playerId: intent.playerId, type: "ERROR", code: "INVALID_CONSTRUCTION",
+                            message: result.error || "Cannot construct", timestamp
+                        }]
+                    };
+                }
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
+            }
+
 
             case "DECLARE_BANKRUPTCY": {
                 const result = resolveDeclareBankruptcy(newState, currentActivePlayer);
@@ -226,7 +252,7 @@ export class RulesEngine {
                         }]
                     };
                 }
-                return { state: newState, events: result.events };
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             case "END_TURN": {
@@ -248,6 +274,69 @@ export class RulesEngine {
                     state: newState,
                     events: result.events
                 };
+            }
+
+            case "CREATE_TRADE_OFFER": {
+                const result = resolveCreateTradeOffer(newState, currentActivePlayer, intent.payload);
+                if (!result.success) {
+                    return { state, events: [{ playerId: intent.playerId, type: "ERROR", code: "INVALID_TRADE", message: result.error || "Cannot create offer", timestamp }] };
+                }
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
+            }
+
+            case "COUNTER_TRADE_OFFER": {
+                const result = resolveCounterTradeOffer(newState, currentActivePlayer, intent.payload);
+                if (!result.success) {
+                    return { state, events: [{ playerId: intent.playerId, type: "ERROR", code: "INVALID_TRADE", message: result.error || "Cannot counter offer", timestamp }] };
+                }
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
+            }
+
+            case "ACCEPT_TRADE_OFFER": {
+                const result = resolveAcceptTradeOffer(newState, currentActivePlayer, intent.payload);
+                if (!result.success) {
+                    return { state, events: [{ playerId: intent.playerId, type: "ERROR", code: "INVALID_TRADE", message: result.error || "Cannot accept offer", timestamp }] };
+                }
+                
+                // Finance Integration: Recheck Liquidity
+                // "after the accepted trade executes, Finance must immediately recheck the obligation. if sufficient cash now exists, payment proceeds."
+                if (currentActivePlayer.status === "IN_LIQUIDITY_RESOLUTION") {
+                    const ob = newState.public.activeObligation;
+                    if (ob && currentActivePlayer.cash >= ob.amount) {
+                        currentActivePlayer.cash -= ob.amount;
+                        if (ob.recipientId) {
+                            const rec = newState.public.players.find(p => p.id === ob.recipientId);
+                            if (rec) rec.cash += ob.amount;
+                        }
+                        currentActivePlayer.status = "ACTIVE";
+                        newState.public.activeObligation = null;
+                        newState.public.turnPhase = "OPTIONAL_ACTIONS";
+                        result.events.push({
+                            type: "INFORMATION_REVEALED",
+                            payload: { message: "Liquidity resolved via trade!" },
+                            timestamp
+                        });
+                    }
+                }
+                // Same for sender if they were somehow in liquidity resolution, but we prevented that in CREATE_TRADE_OFFER and COUNTER_TRADE_OFFER.
+
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
+            }
+
+            case "REJECT_TRADE_OFFER": {
+                const result = resolveRejectTradeOffer(newState, currentActivePlayer, intent.payload);
+                if (!result.success) {
+                    return { state, events: [{ playerId: intent.playerId, type: "ERROR", code: "INVALID_TRADE", message: result.error || "Cannot reject offer", timestamp }] };
+                }
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
+            }
+
+            case "CANCEL_TRADE_OFFER": {
+                const result = resolveCancelTradeOffer(newState, currentActivePlayer, intent.payload);
+                if (!result.success) {
+                    return { state, events: [{ playerId: intent.playerId, type: "ERROR", code: "INVALID_TRADE", message: result.error || "Cannot cancel offer", timestamp }] };
+                }
+                return { state: newState, events: [...result.events, ...generateDistrictEvents(state, newState)] };
             }
 
             default:

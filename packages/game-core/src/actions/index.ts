@@ -11,7 +11,13 @@ export type IntentType =
     | "PAY_MUNICIPAL_LEVY"
     | "LIQUIDATE_PROPERTY"
     | "LIQUIDATE_DEVELOPMENT"
-    | "DECLARE_BANKRUPTCY";
+    | "CONSTRUCT_DEVELOPMENT"
+    | "DECLARE_BANKRUPTCY"
+    | "CREATE_TRADE_OFFER"
+    | "COUNTER_TRADE_OFFER"
+    | "ACCEPT_TRADE_OFFER"
+    | "REJECT_TRADE_OFFER"
+    | "CANCEL_TRADE_OFFER";
 
 export interface Intent<T = any> {
     type: IntentType;

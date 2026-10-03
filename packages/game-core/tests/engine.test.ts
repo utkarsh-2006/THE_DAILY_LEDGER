@@ -19,7 +19,7 @@ describe('RulesEngine Phase 1 - Authoritative Kernel Audit & Verification', () =
         state = createInitialGameState([
             { id: "p1", name: "Player 1" },
             { id: "p2", name: "Player 2" }
-        ]);
+        ], new DeterministicTestRandomSource());
     });
 
     describe('1. Game Initialization', () => {
@@ -53,17 +53,17 @@ describe('RulesEngine Phase 1 - Authoritative Kernel Audit & Verification', () =
                 { id: "p2", name: "P2" },
                 { id: "p3", name: "P3" },
                 { id: "p4", name: "P4" }
-            ]);
+            ], new DeterministicTestRandomSource());
             expect(state4.public.players.length).toBe(4);
 
-            expect(() => createInitialGameState([{ id: "p1", name: "P1" }])).toThrow();
+            expect(() => createInitialGameState([{ id: "p1", name: "P1" }], new DeterministicTestRandomSource())).toThrow();
             expect(() => createInitialGameState([
                 { id: "p1", name: "P1" },
                 { id: "p2", name: "P2" },
                 { id: "p3", name: "P3" },
                 { id: "p4", name: "P4" },
                 { id: "p5", name: "P5" }
-            ])).toThrow();
+            ], new DeterministicTestRandomSource())).toThrow();
         });
     });
 

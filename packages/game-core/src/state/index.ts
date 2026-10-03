@@ -1,4 +1,4 @@
-import { BoardSpace, PropertyData, PROPERTIES } from "game-data";
+import { BoardSpace, PropertyData, PROPERTIES, DEVELOPMENT_PROJECTS } from "game-data";
 
 export type GameStatus = "INIT" | "IN_PROGRESS" | "ENDED" | "FINAL_ROUND_FREEZE";
 export type TurnPhase = 
@@ -37,6 +37,19 @@ export interface Obligation {
     propertyId?: string; // Optional context
 }
 
+export interface TradeOffer {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    offeredProperties: string[];
+    offeredCash: number;
+    requestedProperties: string[];
+    requestedCash: number;
+    status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+    counterOfferCount: number;
+    createdAt: number;
+}
+
 export interface PublicState {
     gameStatus: GameStatus;
     currentRound: number;
@@ -44,9 +57,12 @@ export interface PublicState {
     activePlayerIndex: number;
     players: Player[];
     properties: Record<string, PropertyState>;
+    tradeOffers: TradeOffer[];
     pendingActionRequired: string | null;
     civicReserveActive: boolean;
     activeObligation: Obligation | null;
+    developmentExchange: string[];
+    developmentSupply: string[];
 }
 
 export interface PrivatePlayerState {
@@ -58,6 +74,8 @@ export interface ServerOnlyState {
     internalAudit?: string[];
 }
 
+import { RandomSource, ProductionRandomSource } from "../randomness/index.js";
+
 export interface GameState {
     public: PublicState;
     private: Record<string, PrivatePlayerState>;
@@ -66,7 +84,7 @@ export interface GameState {
 
 export const INITIAL_CASH = 1800;
 
-export function createInitialGameState(playerConfigs: { id: string; name: string }[]): GameState {
+export function createInitialGameState(playerConfigs: { id: string; name: string }[], randomSource: RandomSource = new ProductionRandomSource()): GameState {
     if (playerConfigs.length < 2 || playerConfigs.length > 4) {
         throw new Error("Invalid player count. The game requires 2 to 4 players.");
     }
@@ -99,6 +117,12 @@ export function createInitialGameState(playerConfigs: { id: string; name: string
         };
     }
 
+    
+    let allDevIds = DEVELOPMENT_PROJECTS.map(p => p.id);
+    allDevIds = randomSource.shuffle(allDevIds);
+    const developmentExchange = allDevIds.splice(0, 4);
+    const developmentSupply = allDevIds;
+    
     return {
         public: {
             gameStatus: "IN_PROGRESS",
@@ -107,9 +131,12 @@ export function createInitialGameState(playerConfigs: { id: string; name: string
             activePlayerIndex: 0,
             players,
             properties,
+            tradeOffers: [],
             pendingActionRequired: null,
             civicReserveActive: false,
-            activeObligation: null
+            activeObligation: null,
+            developmentExchange,
+            developmentSupply
         },
         private: privateState,
         server: {

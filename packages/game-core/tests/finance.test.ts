@@ -1,3 +1,4 @@
+import { DeterministicTestRandomSource } from '../src/randomness/index.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RulesEngine } from '../src/engine/index.js';
 import { createInitialGameState, GameState } from '../src/state/index.js';
@@ -19,7 +20,7 @@ describe('Finance System / Liquidity Resolution', () => {
             { id: "p1", name: "Player 1" },
             { id: "p2", name: "Player 2" },
             { id: "p3", name: "Player 3" }
-        ]);
+        ], new DeterministicTestRandomSource());
         engine = new RulesEngine(new MockRandom(1, 1));
     });
 

@@ -1,6 +1,8 @@
 import { GameState, Player } from "../state/index.js";
 import { PublicEvent } from "../events/index.js";
 import { BOARD_SPACES, getPropertyById } from "game-data";
+import { calculateCurrentYield } from "./yield.js";
+import { expirePendingTradesForPlayer } from "./trade.js";
 
 export interface SpaceResolutionResult {
     newState: GameState;
@@ -34,7 +36,7 @@ export function resolveSpaceLanding(
             // Owned by another player: Mandatory rent obligation
             state.public.turnPhase = "RESOLVE_MANDATORY_PAYMENT";
             const owner = state.public.players.find(p => p.id === propState.ownerId)!;
-            const rent = propData.baseYield;
+            const rent = calculateCurrentYield(state, propData.id);
 
             if (player.cash >= rent) {
                 player.cash -= rent;
@@ -256,14 +258,17 @@ export function resolveEndTurn(
     state.public.activePlayerIndex = nextIndex;
     state.public.turnPhase = "MOVE";
 
+    const nextPlayerId = state.public.players[nextIndex].id;
+    const expirationResult = expirePendingTradesForPlayer(state, nextPlayerId);
+
     const event: PublicEvent = {
         type: "TURN_ADVANCED",
         payload: {
-            newActivePlayerId: state.public.players[nextIndex].id,
+            newActivePlayerId: nextPlayerId,
             currentRound: state.public.currentRound
         },
         timestamp: Date.now()
     };
 
-    return { success: true, events: [event] };
+    return { success: true, events: [event, ...expirationResult.events] };
 }

@@ -18,7 +18,15 @@ export type PublicEventType =
     | "INFORMATION_REVEALED"
     | "PROPERTY_LIQUIDATED"
     | "DEVELOPMENT_LIQUIDATED"
-    | "PLAYER_BANKRUPT";
+    | "DEVELOPMENT_CONSTRUCTED"
+    | "PLAYER_BANKRUPT"
+    | "TRADE_OFFER_CREATED"
+    | "TRADE_OFFER_ACCEPTED"
+    | "TRADE_OFFER_REJECTED"
+    | "TRADE_OFFER_CANCELLED"
+    | "TRADE_OFFER_EXPIRED"
+    | "TRADE_EXECUTED"
+    | "DISTRICT_CONTROL_CHANGED";
 
 export interface PublicEvent {
     type: PublicEventType;
