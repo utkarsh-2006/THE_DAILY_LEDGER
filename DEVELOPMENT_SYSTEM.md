@@ -1,4 +1,8 @@
-# Development System v1
+# Development System
+
+> **DEVELOPMENT SYSTEM v1.1 — COMPATIBILITY AND NETWORK AMENDMENT**
+> The property compatibility matrix requirement and complete Network registry have been strictly locked and reconciled across all design documents.
+ v1
 
 **Status:** LOCKED FOR GAME DESIGN
 
@@ -52,7 +56,7 @@ Primary compatibility gives the full intended project effect.
 Secondary compatibility gives a reduced effect.
 Restricted projects cannot be constructed on the property.
 
-*(The actual property-by-property compatibility matrix belongs to the property catalogue and should not be invented in this document unless already defined elsewhere.)*
+*(The fully reconciled property-by-property compatibility matrix is explicitly listed in `PROPERTY_CATALOGUE.md` under the v1.1 amendment. Exactly 2 Primary, 2 Secondary, and 4 Restricted families apply to each property.)*
 
 ## Project Cost
 Do not introduce an independent project pricing system.
@@ -73,6 +77,21 @@ Ordinary projects are first-come, first-served.
 There is no ordinary development auction in v1.
 
 The Exchange should not become a permanent heavy UI panel. It can be surfaced contextually when a player chooses to develop.
+
+
+## Authoritative Network Registry
+The following is the exhaustive list of valid Development Network combinations. No other family pair may activate a Development Network.
+
+1.  **Connected Commerce:** Office Annex + Transit Access
+2.  **Leisure Transit:** Hospitality Wing + Transit Access
+3.  **Resilient Hospitality:** Hospitality Wing + Energy Retrofit
+4.  **Clean Production:** Production Line + Energy Retrofit
+5.  **Industrial Flow:** Production Line + Logistics Hub
+6.  **Civic Supply:** Logistics Hub + Civic Infrastructure
+7.  **Civic Commerce:** Civic Infrastructure + Retail Arcade
+8.  **Commercial Exchange:** Retail Arcade + Office Annex
+
+*(Note: Network activation requires the participating properties to be distinct. A single property holding both families does not form a network.)*
 
 ## Development Timing
 A player may perform at most one development action per turn.

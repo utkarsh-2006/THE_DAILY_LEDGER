@@ -1,4 +1,8 @@
-# District Control System v1
+# District Control
+
+> **DEVELOPMENT SYSTEM v1.1 — COMPATIBILITY AND NETWORK AMENDMENT**
+> Network eligibility is now strictly governed by the authoritative Network Registry defined in `DEVELOPMENT_SYSTEM.md`.
+ System v1
 
 ## Status
 LOCKED FOR GAME DESIGN
@@ -60,7 +64,7 @@ A controlled district may have **ONE** active Development Network.
 
 A Development Network requires:
 *   The player controls the district (4/4).
-*   Compatible development families exist across at least two properties in that district (e.g., Office Annex + Transit Access).
+*   Compatible development families exist across at least two properties in that district. The families must perfectly match one of the 8 explicit combinations in the Authoritative Network Registry (see `DEVELOPMENT_SYSTEM.md`).
 
 *   **Gameplay effect:** The active network provides an additional **+5% Current Yield** to the participating properties.
 

@@ -2,7 +2,7 @@ import colyseus from "colyseus";
 import type { Client } from "colyseus";
 const { Room } = colyseus;
 import { Schema, type } from "@colyseus/schema";
-import { GameState, RulesEngine, DeterministicTestRandomSource, createInitialGameState } from "game-core";
+import { GameState, RulesEngine, ProductionRandomSource, DeterministicTestRandomSource, createInitialGameState } from "game-core";
 
 export class GameRoomState extends Schema {
     @type("string")
@@ -38,12 +38,7 @@ export class DailyLedgerRoom extends Room<GameRoomState> {
         ]);
         
         // Use a simple production random source inside the room
-        const productionRandom = {
-            rollDice: (): [number, number] => [
-                Math.floor(Math.random() * 6) + 1,
-                Math.floor(Math.random() * 6) + 1
-            ]
-        };
+        const productionRandom = new ProductionRandomSource();
         this.engine = new RulesEngine(productionRandom);
 
         this.syncState();
